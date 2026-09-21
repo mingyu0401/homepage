@@ -123,6 +123,31 @@
   apply(localStorage.getItem('theme-mode') || 'system');
 })();
 
+/* ===== 点击复制联系方式 ===== */
+(() => {
+  let timer;
+  function toast(msg) {
+    let el = document.querySelector('.toast');
+    if (!el) { el = document.createElement('div'); el.className = 'toast'; document.body.append(el); }
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(timer);
+    timer = setTimeout(() => el.classList.remove('show'), 1800);
+  }
+  document.querySelectorAll('[data-copy]').forEach(el => el.addEventListener('click', async e => {
+    e.preventDefault();
+    const v = el.dataset.copy;
+    try {
+      await navigator.clipboard.writeText(v);
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = v; document.body.append(ta); ta.select();
+      document.execCommand('copy'); ta.remove();
+    }
+    toast(`已复制：${v}`);
+  }));
+})();
+
 /* ===== Hero CTA 磁吸效果 ===== */
 (() => {
   const cta = document.getElementById('hero-cta');
