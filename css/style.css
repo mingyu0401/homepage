@@ -123,14 +123,14 @@ a { color: inherit; text-decoration: none; }
 
 .social-row { display: flex; gap: 14px; margin-top: 26px; flex-wrap: wrap; justify-content: center; }
 .social {
-  min-width: 64px; padding: 10px 12px 8px; font: inherit; color: var(--text-dim);
-  display: flex; flex-direction: column; align-items: center; gap: 6px;
-  border-radius: 12px; cursor: pointer;
+  min-width: 88px; padding: 15px 16px 12px; font: inherit; color: var(--text-dim);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  border-radius: 14px; cursor: pointer;
   background: var(--glass); border: 1px solid var(--glass-border);
   transition: all .3s cubic-bezier(.2, .9, .3, 1.4);
 }
-.social svg { width: 20px; height: 20px; }
-.social-label { font-size: 11.5px; letter-spacing: .3px; }
+.social svg { width: 27px; height: 27px; }
+.social-label { font-size: 13px; letter-spacing: .3px; }
 .social:hover, .social:focus-visible {
   transform: translateY(-4px) scale(1.15); margin-inline: 10px;
   color: var(--accent); box-shadow: 0 8px 24px rgba(249, 168, 108, .25);
@@ -168,9 +168,8 @@ a { color: inherit; text-decoration: none; }
 .emoo-glow {
   position: absolute; inset: 0;
   background: conic-gradient(from var(--ga),
-    rgba(249, 168, 108, .55) 0deg, rgba(255, 127, 165, .55) 60deg, rgba(110, 130, 255, .45) 120deg,
-    transparent 180deg, rgba(110, 130, 255, .45) 240deg, rgba(255, 127, 165, .55) 300deg,
-    rgba(249, 168, 108, .55) 360deg);
+    rgba(249, 168, 108, .6) 0deg, rgba(255, 127, 165, .5) 90deg, rgba(110, 130, 255, .22) 180deg,
+    rgba(255, 127, 165, .5) 270deg, rgba(249, 168, 108, .6) 360deg);
   filter: blur(18px);
   animation: glow-turn 7s linear infinite;
 }
