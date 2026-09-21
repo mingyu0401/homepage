@@ -63,7 +63,7 @@
 /* ===== 打字机 ===== */
 (() => {
   const el = document.getElementById('typewriter');
-  const phrases = ['cute Android apps', 'EMOO 桌面宠物', 'full-stack things', 'tiny warm tools'];
+  const phrases = ['cute Android apps', 'EMOO 图片工具', 'full-stack things', 'tiny warm tools'];
   let pi = 0, ci = 0, del = false;
   function step() {
     const p = phrases[pi];
