@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>橙星 ChengXing · 个人主页</title>
+<meta name="description" content="橙星的个人主页 —— 全栈爱好者，EMOO 桌面宠物开发者">
+<link rel="icon" href="assets/avatar.png" type="image/png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<canvas id="starfield" aria-hidden="true"></canvas>
+<div class="meteor-field" aria-hidden="true"></div>
+
+<header class="site-header">
+  <nav class="nav glass">
+    <a href="#hero" class="nav-link active">
+      <svg viewBox="0 0 24 24" class="i"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+      首页
+    </a>
+    <a href="#emoo" class="nav-link">EMOO</a>
+    <a href="#about" class="nav-link">关于</a>
+    <a href="#contact" class="nav-link">联系</a>
+  </nav>
+</header>
+
+<main>
+  <!-- ===== Hero ===== -->
+  <section id="hero" class="hero">
+    <div class="avatar-wrap reveal">
+      <div class="avatar-ring"></div>
+      <img src="assets/avatar.png" alt="橙星的头像" class="avatar">
+      <span class="status-dot" title="在线"></span>
+    </div>
+
+    <h1 class="hero-title reveal">Hi, I'm <span class="accent" id="name-glitch" data-text="橙星">橙星</span></h1>
+    <p class="hero-sub reveal">I build <span class="accent" id="typewriter"></span><span class="caret">|</span></p>
+
+    <div class="tech-pill reveal glass">
+      with&nbsp;
+      <span class="tech-rotator" id="tech-rotator">Android</span>
+      <span class="tech-dots">· Kotlin · Vue · Node.js · ∞</span>
+    </div>
+
+    <p class="motto reveal">「把喜欢的事情做到极致，把复杂的想法做成产品。」</p>
+
+    <div class="hero-stats reveal">
+      <span>1 个开源项目</span><i>•</i><span id="uptime">EMOO 开发中</span>
+    </div>
+
+    <div class="social-row reveal">
+      <a class="social" href="https://github.com/your-name/EMOO" target="_blank" rel="noopener" title="GitHub">
+        <svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 .5A11.5 11.5 0 0 0 .5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.24.79-.54v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.34-1.28-1.7-1.28-1.7-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.79 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.12 3.05.74.81 1.18 1.83 1.18 3.09 0 4.41-2.69 5.38-5.25 5.67.41.35.78 1.05.78 2.12v3.14c0 .3.2.65.8.54A11.5 11.5 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5z"/></svg>
+      </a>
+      <a class="social" href="#contact" title="邮件">
+        <svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" d="M3 6h18v12H3z"/><path fill="none" stroke="currentColor" stroke-width="1.8" d="M3 7l9 6 9-6"/></svg>
+      </a>
+      <a class="social" href="#emoo" title="EMOO">
+        <svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" d="M12 21s-7-4.6-9.3-9A5.4 5.4 0 0 1 12 6.5 5.4 5.4 0 0 1 21.3 12C19 16.4 12 21 12 21z"/></svg>
+      </a>
+    </div>
+
+    <a href="#emoo" class="hero-cta reveal glass" id="hero-cta">
+      <span class="megaphone">📣</span>
+      <span>认识一下我正在做的小家伙 —— <b>EMOO 桌面宠物</b></span>
+      <span class="arrow">→</span>
+    </a>
+  </section>
+
+  <!-- ===== EMOO ===== -->
+  <section id="emoo" class="section">
+    <h2 class="section-title reveal"><span class="hash">#</span> EMOO</h2>
+    <div class="emoo-card reveal glass">
+      <div class="emoo-glow" aria-hidden="true"></div>
+      <div class="emoo-body">
+        <div class="emoo-head">
+          <span class="emoo-badge">Android · 开源</span>
+          <h3>EMOO —— 住在你手机桌面上的小宠物</h3>
+        </div>
+        <ul class="emoo-feats">
+          <li><b>桌面陪伴</b><span>悬浮在桌面上的 Live 宠物，会互动、会卖萌、会一直陪着你</span></li>
+          <li><b>一键发送</b><span>基于无障碍 / Shizuku，把图片和文件一步直达微信、QQ</span></li>
+          <li><b>轻量省电</b><span>原生 Kotlin 实现，不占资源，不打扰日常使用</span></li>
+        </ul>
+        <div class="emoo-actions">
+          <!-- TODO: 替换为你的真实仓库地址 -->
+          <a class="btn btn-primary" href="https://github.com/your-name/EMOO" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" class="btn-i"><path fill="currentColor" d="M12 .5A11.5 11.5 0 0 0 .5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.24.79-.54v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.34-1.28-1.7-1.28-1.7-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.79 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.12 3.05.74.81 1.18 1.83 1.18 3.09 0 4.41-2.69 5.38-5.25 5.67.41.35.78 1.05.78 2.12v3.14c0 .3.2.65.8.54A11.5 11.5 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5z"/></svg>
+            前往 GitHub 仓库
+          </a>
+          <a class="btn btn-ghost" href="#contact">求体验 · 联系我</a>
+        </div>
+      </div>
+      <div class="emoo-side" aria-hidden="true">
+        <img src="assets/avatar.png" alt="" class="emoo-mascot">
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== About ===== -->
+  <section id="about" class="section">
+    <h2 class="section-title reveal"><span class="hash">#</span> 关于我</h2>
+    <div class="about-grid">
+      <div class="about-item reveal glass">
+        <span class="about-emoji">🛠</span>
+        <h4>爱折腾的开发者</h4>
+        <p>从 Android 到 Web，喜欢把脑子里的奇思妙想一行行变成能用的东西。</p>
+      </div>
+      <div class="about-item reveal glass">
+        <span class="about-emoji">🐾</span>
+        <h4>产品从陪伴出发</h4>
+        <p>相信工具也可以有温度，EMOO 就是这种想法的第一个孩子。</p>
+      </div>
+      <div class="about-item reveal glass">
+        <span class="about-emoji">🌱</span>
+        <h4>持续学习中</h4>
+        <p>Kotlin / Compose / Node / 前端动画，哪块缺补哪块，永远在升级。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Contact ===== -->
+  <section id="contact" class="section">
+    <h2 class="section-title reveal"><span class="hash">#</span> 联系我</h2>
+    <div class="contact-card reveal glass">
+      <p>想聊聊 EMOO、合作或者只是打个招呼？</p>
+      <a class="btn btn-primary" href="mailto:hello@example.com">✉️ 给我发邮件</a>
+      <p class="contact-tip">（把 <code>hello@example.com</code> 换成你的邮箱即可）</p>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="footer-left">
+    <span class="footer-name">橙星 ChengXing</span>
+    <span class="footer-quote">"Keep building, keep playing."</span>
+    <span class="footer-copy">© 2022–2026 · Powered by vanilla HTML/CSS/JS</span>
+  </div>
+  <div class="theme-switch glass" role="group" aria-label="主题切换">
+    <button data-set-theme="light">Light</button>
+    <button data-set-theme="system">System</button>
+    <button data-set-theme="dark" class="on">Dark</button>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>
