@@ -119,8 +119,8 @@
     btns.forEach(b => b.classList.toggle('on', b.dataset.setTheme === mode));
   }
   btns.forEach(b => b.addEventListener('click', () => apply(b.dataset.setTheme)));
-  mq.addEventListener('change', () => apply(localStorage.getItem('theme-mode') || 'dark'));
-  apply(localStorage.getItem('theme-mode') || 'dark');
+  mq.addEventListener('change', () => apply(localStorage.getItem('theme-mode') || 'system'));
+  apply(localStorage.getItem('theme-mode') || 'system');
 })();
 
 /* ===== Hero CTA 磁吸效果 ===== */
