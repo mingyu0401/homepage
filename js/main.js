@@ -65,12 +65,12 @@
   }
   function scheduleMeteor() {
     setTimeout(() => {
-      if (lightTarget === 0 && lightMix < .35) spawnMeteor();
+      if (!document.hidden && lightTarget === 0 && lightMix < .35) spawnMeteor();
       scheduleMeteor();
     }, Math.random() * 4500 + 2500);
   }
   if (!reduce) {
-    setTimeout(() => { if (lightTarget === 0) spawnMeteor(); scheduleMeteor(); }, 1500);
+    setTimeout(() => { if (!document.hidden && lightTarget === 0) spawnMeteor(); scheduleMeteor(); }, 1500);
   }
   document.addEventListener('meteor-shower', () => {
     for (let i = 0; i < 14; i++) spawnMeteor(Math.random() * W, -Math.random() * H * .35, true);
@@ -328,33 +328,59 @@
     ghost.textContent = widest;
   }
   let pi = 0, ci = 0, del = false;
+  let timer = 0, running = false;
   function step() {
+    timer = 0;
     const p = phrases[pi];
     ci += del ? -1 : 1;
     el.textContent = p.slice(0, ci);
     let wait = del ? 45 : 95;
     if (!del && ci === p.length) { del = true; wait = 1600; }
     else if (del && ci === 0) { del = false; pi = (pi + 1) % phrases.length; wait = 400; }
-    setTimeout(step, wait);
+    timer = setTimeout(step, wait);
   }
-  step();
+  // 后台标签页的定时器会被浏览器节流，节流波动时积压的链条会爆发式补跑，
+  // 表现为页面内容“自己刷新”。隐藏时彻底停表，可见时从干净状态续跑。
+  function pause() { running = false; clearTimeout(timer); timer = 0; }
+  function resume() {
+    if (running) return;
+    running = true;
+    timer = setTimeout(step, 200);
+  }
+  document.addEventListener('visibilitychange', () => document.hidden ? pause() : resume());
+  if (!document.hidden) resume();
 })();
 
 /* ===== 技术栈轮播 ===== */
 (() => {
   const el = document.getElementById('tech-rotator');
   const list = ['Android', 'Kotlin', 'Vue', 'Node.js', 'Compose'];
-  let i = 0;
+  let i = 0, t1 = 0, t2 = 0, running = false;
   function cycle() {
+    t1 = 0;
     el.style.opacity = 0; el.style.transform = 'translateY(-6px)';
-    setTimeout(() => {
+    t2 = setTimeout(() => {
+      t2 = 0;
       i = (i + 1) % list.length;
       el.textContent = list[i];
       el.style.opacity = 1; el.style.transform = 'none';
-      setTimeout(cycle, 1950);
+      t1 = setTimeout(cycle, 1950);
     }, 250);
   }
-  setTimeout(cycle, 2200);
+  // 同打字机：隐藏时停表，避免节流积压后回到前台时内容连跳
+  function pause() {
+    running = false;
+    clearTimeout(t1); clearTimeout(t2);
+    t1 = t2 = 0;
+    el.style.opacity = 1; el.style.transform = 'none';
+  }
+  function resume() {
+    if (running) return;
+    running = true;
+    t1 = setTimeout(cycle, 2200);
+  }
+  document.addEventListener('visibilitychange', () => document.hidden ? pause() : resume());
+  if (!document.hidden) resume();
 })();
 
 /* ===== 滚动显现 + 导航高亮 ===== */
