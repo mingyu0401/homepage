@@ -107,18 +107,43 @@
   document.querySelectorAll('main section').forEach(s => secIO.observe(s));
 })();
 
-/* ===== 主题切换（light / system / dark）===== */
+/* ===== 主题切换（light / system / dark，切换时从点击处圆形扩散，SnowLuma 同款）===== */
 (() => {
   const root = document.documentElement;
   const mq = matchMedia('(prefers-color-scheme: light)');
   const btns = [...document.querySelectorAll('[data-set-theme]')];
+  let lastPoint = null;
+  addEventListener('pointerdown', e => { lastPoint = { x: e.clientX, y: e.clientY }; }, { capture: true });
+
+  function withReveal(update) {
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (typeof document.startViewTransition !== 'function' || document.visibilityState === 'hidden' || reduce) {
+      update(); return;
+    }
+    const x = lastPoint?.x ?? innerWidth / 2;
+    const y = lastPoint?.y ?? innerHeight / 2;
+    const r = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+    root.style.setProperty('--vt-x', `${x}px`);
+    root.style.setProperty('--vt-y', `${y}px`);
+    root.style.setProperty('--vt-r', `${r}px`);
+    try {
+      const vt = document.startViewTransition(() => {
+        document.body.style.transition = 'none';
+        update();
+      });
+      Promise.resolve(vt?.finished).catch(() => {}).finally(() => {
+        document.body.style.transition = '';
+      });
+    } catch { update(); }
+  }
+
   function apply(mode) {
     localStorage.setItem('theme-mode', mode);
     const eff = mode === 'system' ? (mq.matches ? 'light' : 'dark') : mode;
     root.dataset.theme = eff;
     btns.forEach(b => b.classList.toggle('on', b.dataset.setTheme === mode));
   }
-  btns.forEach(b => b.addEventListener('click', () => apply(b.dataset.setTheme)));
+  btns.forEach(b => b.addEventListener('click', () => withReveal(() => apply(b.dataset.setTheme))));
   mq.addEventListener('change', () => apply(localStorage.getItem('theme-mode') || 'system'));
   apply(localStorage.getItem('theme-mode') || 'system');
 })();
