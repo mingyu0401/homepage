@@ -88,11 +88,12 @@
     const mix = lightMix;
     ctx.clearRect(0, 0, W, H);
 
-    const cr = Math.round(255 - 139 * mix);
-    const cg = Math.round(255 - 107 * mix);
-    const cb = Math.round(255 - 65 * mix);
+    const cr = Math.round(255 - 165 * mix);
+    const cg = Math.round(255 - 125 * mix);
+    const cb = Math.round(255 - 75 * mix);
     const slant = Math.sin(TILT) * mix;
     const drop = Math.cos(TILT) * mix;
+    const rainLen = 1 + mix * 1.6; // 雨滴比星点拖尾更长
 
     ctx.lineCap = 'round';
     for (const s of stars) {
@@ -106,7 +107,7 @@
       if (s.y > H + 24) { s.y = -24; s.x = Math.random() * W; }
       else if (s.x > W + 24) s.x = -24;
 
-      const alpha = s.a * .8 * (1 - mix) + (s.a * .16 + .08) * mix;
+      const alpha = s.a * .8 * (1 - mix) + (s.a * .3 + .2) * mix;
       ctx.strokeStyle = `rgba(${cr},${cg},${cb},${alpha.toFixed(3)})`;
       if (mix < .02) {
         ctx.beginPath();
@@ -114,10 +115,10 @@
         ctx.fillStyle = ctx.strokeStyle;
         ctx.fill();
       } else {
-        ctx.lineWidth = s.r * 2 * (1 - mix) + 1.05 * mix;
+        ctx.lineWidth = s.r * 2 * (1 - mix) + 1.4 * mix;
         ctx.beginPath();
         ctx.moveTo(s.x, s.y);
-        ctx.lineTo(s.x - slant * s.len, s.y - drop * s.len);
+        ctx.lineTo(s.x - slant * s.len * rainLen, s.y - drop * s.len * rainLen);
         ctx.stroke();
       }
     }
