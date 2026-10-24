@@ -426,7 +426,7 @@
   update();
 })();
 
-/* ===== 主题切换（黑幕从开关椭圆扩散 / 收回，可随时打断） ===== */
+/* ===== 主题切换（黑幕从开关胶囊形扩散 / 收回，可随时打断） ===== */
 (() => {
   const root = document.documentElement;
   const body = document.body;
@@ -438,8 +438,8 @@
   const veil = document.querySelector('.theme-veil');
 
   let mode = localStorage.getItem('theme-mode') || 'system';
-  let coverage = 0; // 0 = 收到开关椭圆大小，1 = 铺满全屏
-  let cx = 0, cy = 0, rx0 = 0, ry0 = 0, rx1 = 0, ry1 = 0;
+  let coverage = 0; // 0 = 收到开关胶囊大小，1 = 铺满全屏
+  let inT = 0, inR = 0, inB = 0, inL = 0, rad0 = 0;
   let shown = false, dest = null, raf = 0, fadeTimer = 0;
 
   const effective = m => m === 'system' ? (mq.matches ? 'light' : 'dark') : m;
@@ -460,20 +460,16 @@
 
   function geometry() {
     const b = pill.getBoundingClientRect();
-    cx = b.left + b.width / 2;
-    cy = b.top + b.height / 2;
-    rx0 = b.width / 2 + 2;
-    ry0 = b.height / 2 + 2;
-    const dx = Math.max(cx, innerWidth - cx);
-    const dy = Math.max(cy, innerHeight - cy);
-    // 椭圆长轴需超过对角距离的 1/√2 倍才能覆盖四角
-    rx1 = dx * 1.45 + 4;
-    ry1 = dy * 1.45 + 4;
+    // 终点形状 = 开关模块的操场形外框（略放大 2px，收口时完全盖住描边）
+    inT = Math.max(0, b.top - 2);
+    inL = Math.max(0, b.left - 2);
+    inB = Math.max(0, innerHeight - b.bottom - 2);
+    inR = Math.max(0, innerWidth - b.right - 2);
+    rad0 = b.height / 2 + 2;
   }
   function paint() {
-    const rx = rx0 + (rx1 - rx0) * coverage;
-    const ry = ry0 + (ry1 - ry0) * coverage;
-    veil.style.clipPath = `ellipse(${rx.toFixed(1)}px ${ry.toFixed(1)}px at ${cx.toFixed(1)}px ${cy.toFixed(1)}px)`;
+    const k = 1 - coverage; // 1 = 胶囊收口，0 = 铺满全屏
+    veil.style.clipPath = `inset(${(inT * k).toFixed(1)}px ${(inR * k).toFixed(1)}px ${(inB * k).toFixed(1)}px ${(inL * k).toFixed(1)}px round ${(rad0 * k).toFixed(1)}px)`;
   }
   function show() {
     if (shown) return;
