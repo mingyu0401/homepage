@@ -1,69 +1,300 @@
-/* ===== 星空粒子背景 ===== */
+/* ===== 星空 / 雨滴背景 ===== */
 (() => {
   const cv = document.getElementById('starfield');
   const ctx = cv.getContext('2d');
-  let stars = [], meteors = [], W, H;
   const DPR = Math.min(devicePixelRatio || 1, 2);
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const TILT = 0.2;
+  let W = 0, H = 0, stars = [], meteors = [];
+  let lightMix = document.documentElement.dataset.theme === 'light' ? 1 : 0;
+  let lightTarget = lightMix;
+  let last = performance.now();
 
   function resize() {
-    W = cv.width = innerWidth * DPR;
-    H = cv.height = innerHeight * DPR;
-    cv.style.width = innerWidth + 'px';
-    cv.style.height = innerHeight + 'px';
-    const n = Math.floor(innerWidth / 6);
-    stars = Array.from({ length: n }, () => ({
-      x: Math.random() * W, y: Math.random() * H,
-      r: (Math.random() * 1.3 + .3) * DPR,
-      a: Math.random(), va: (Math.random() * .012 + .003) * (Math.random() < .5 ? 1 : -1),
-      vy: (Math.random() * .06 + .01) * DPR,
-    }));
-  }
-  addEventListener('resize', resize); resize();
-
-  function spawnMeteor() {
-    meteors.push({
-      x: Math.random() * W * .9, y: -20,
-      len: (Math.random() * 120 + 80) * DPR,
-      v: (Math.random() * 6 + 7) * DPR, ang: Math.PI / 3.4, life: 1,
+    W = innerWidth; H = innerHeight;
+    cv.width = Math.floor(W * DPR);
+    cv.height = Math.floor(H * DPR);
+    cv.style.width = W + 'px';
+    cv.style.height = H + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    const n = Math.floor(W / 6);
+    stars = Array.from({ length: n }, () => {
+      const r = Math.random() * 1.2 + .35;
+      return {
+        x: Math.random() * W, y: Math.random() * H, r,
+        len: r * 7 + Math.random() * 7,
+        a: Math.random(), va: (Math.random() * .012 + .003) * (Math.random() < .5 ? 1 : -1),
+        vy: Math.random() * .05 + .01,
+        rain: Math.random() * 2.2 + 1.9,
+      };
     });
-    setTimeout(spawnMeteor, Math.random() * 4500 + 2500);
+    meteors = [];
   }
-  setTimeout(spawnMeteor, 1500);
+  addEventListener('resize', resize);
+  resize();
 
-  function tick() {
+  function spawnMeteor(x, y, shower) {
+    meteors.push({
+      x: x ?? Math.random() * W * .9,
+      y: y ?? (shower ? -Math.random() * H * .3 : -20),
+      len: Math.random() * 120 + 80,
+      v: (Math.random() * 6 + 7) * (shower ? 1.4 : 1),
+      ang: Math.PI / 3.4 + (shower ? (Math.random() - .5) * .5 : 0),
+      life: 1,
+    });
+  }
+  function scheduleMeteor() {
+    setTimeout(() => {
+      if (lightTarget === 0 && lightMix < .35) spawnMeteor();
+      scheduleMeteor();
+    }, Math.random() * 4500 + 2500);
+  }
+  if (!reduce) {
+    setTimeout(() => { if (lightTarget === 0) spawnMeteor(); scheduleMeteor(); }, 1500);
+  }
+  document.addEventListener('meteor-shower', () => {
+    for (let i = 0; i < 14; i++) spawnMeteor(Math.random() * W, -Math.random() * H * .35, true);
+  });
+
+  new MutationObserver(() => {
+    lightTarget = document.documentElement.dataset.theme === 'light' ? 1 : 0;
+  }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  function tick(now) {
+    const dt = Math.max(0, Math.min(now - last, 48)) / 16.667;
+    last = now;
+    lightMix += (lightTarget - lightMix) * Math.min(1, dt * .06);
+    if (Math.abs(lightTarget - lightMix) < .002) lightMix = lightTarget;
+    const mix = lightMix;
     ctx.clearRect(0, 0, W, H);
-    const light = document.documentElement.dataset.theme === 'light';
+
+    const cr = Math.round(255 - 139 * mix);
+    const cg = Math.round(255 - 107 * mix);
+    const cb = Math.round(255 - 65 * mix);
+    const slant = Math.sin(TILT) * mix;
+    const drop = Math.cos(TILT) * mix;
+
+    ctx.lineCap = 'round';
     for (const s of stars) {
-      s.a += s.va; if (s.a > 1 || s.a < .05) s.va *= -1;
-      s.y += s.vy; if (s.y > H) { s.y = 0; s.x = Math.random() * W; }
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r, 0, 7);
-      ctx.fillStyle = light
-        ? `rgba(120,110,160,${s.a * .5})`
-        : `rgba(255,255,255,${s.a * .85})`;
-      ctx.fill();
+      s.a += s.va * dt;
+      if (s.a > 1) { s.a = 1; s.va *= -1; }
+      else if (s.a < .05) { s.a = .05; s.va *= -1; }
+
+      const fall = (s.vy * (1 - mix) + s.rain * mix) * dt;
+      s.y += fall;
+      s.x += fall * TILT * mix;
+      if (s.y > H + 24) { s.y = -24; s.x = Math.random() * W; }
+      else if (s.x > W + 24) s.x = -24;
+
+      const alpha = s.a * .8 * (1 - mix) + (s.a * .16 + .08) * mix;
+      ctx.strokeStyle = `rgba(${cr},${cg},${cb},${alpha.toFixed(3)})`;
+      if (mix < .02) {
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, 7);
+        ctx.fillStyle = ctx.strokeStyle;
+        ctx.fill();
+      } else {
+        ctx.lineWidth = s.r * 2 * (1 - mix) + 1.05 * mix;
+        ctx.beginPath();
+        ctx.moveTo(s.x, s.y);
+        ctx.lineTo(s.x - slant * s.len, s.y - drop * s.len);
+        ctx.stroke();
+      }
     }
+
     for (let i = meteors.length - 1; i >= 0; i--) {
       const m = meteors[i];
-      m.x += Math.cos(m.ang) * m.v; m.y += Math.sin(m.ang) * m.v; m.life -= .008;
-      const g = ctx.createLinearGradient(m.x, m.y, m.x - Math.cos(m.ang) * m.len, m.y - Math.sin(m.ang) * m.len);
-      g.addColorStop(0, `rgba(255,200,150,${Math.max(m.life, 0)})`);
-      g.addColorStop(1, 'rgba(255,200,150,0)');
-      ctx.strokeStyle = g; ctx.lineWidth = 1.6 * DPR;
-      ctx.beginPath(); ctx.moveTo(m.x, m.y);
-      ctx.lineTo(m.x - Math.cos(m.ang) * m.len, m.y - Math.sin(m.ang) * m.len);
+      m.x += Math.cos(m.ang) * m.v * dt;
+      m.y += Math.sin(m.ang) * m.v * dt;
+      m.life -= (mix > .5 ? .03 : .008) * dt;
+      const a = Math.max(m.life, 0);
+      const tx = m.x - Math.cos(m.ang) * m.len;
+      const ty = m.y - Math.sin(m.ang) * m.len;
+      const g = ctx.createLinearGradient(m.x, m.y, tx, ty);
+      g.addColorStop(0, `rgba(190,228,255,${a.toFixed(3)})`);
+      g.addColorStop(1, 'rgba(140,200,255,0)');
+      ctx.strokeStyle = g;
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(m.x, m.y);
+      ctx.lineTo(tx, ty);
       ctx.stroke();
-      if (m.life <= 0 || m.y > H + 50) meteors.splice(i, 1);
+      if (m.life <= 0 || m.y > H + 80 || m.x > W + 80) meteors.splice(i, 1);
     }
-    requestAnimationFrame(tick);
   }
-  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) tick();
+
+  if (!reduce) {
+    requestAnimationFrame(function loop(now) {
+      tick(now);
+      requestAnimationFrame(loop);
+    });
+  }
+})();
+
+/* ===== 点击反馈（BASpark 风格：扩散圆 + 旋转光弧 + 火花） ===== */
+(() => {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const cv = document.getElementById('fx');
+  if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const DPR = Math.min(devicePixelRatio || 1, 2);
+  const SCALE = 1.4;
+  const waves = [], sparks = [];
+  let W = 0, H = 0, running = false, last = 0;
+
+  function resize() {
+    W = innerWidth; H = innerHeight;
+    cv.width = Math.floor(W * DPR);
+    cv.height = Math.floor(H * DPR);
+    cv.style.width = W + 'px';
+    cv.style.height = H + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+  addEventListener('resize', resize);
+  resize();
+
+  function palette() {
+    return document.documentElement.dataset.theme === 'light'
+      ? { fill: '224,122,63', ring0: [255, 255, 255], ring1: [224, 79, 124], spark: '224,79,124' }
+      : { fill: '249,168,108', ring0: [250, 252, 252], ring1: [150, 210, 255], spark: '255,255,255' };
+  }
+
+  function spawn(x, y) {
+    const P = palette();
+    waves.push({
+      x, y, r: 0, life: 0, ang: Math.random() * Math.PI * 2, P,
+      rs: [0, .08, .1][Math.floor(Math.random() * 3)],
+      segs: [
+        { off: 0, len: 1.1 * Math.PI, rate: [0, 1, 1.5, 2][Math.floor(Math.random() * 4)] },
+        { off: (Math.random() * 3 - 1.5) * Math.PI, len: 1.1 * Math.PI, rate: [0, 1, 1.5, 2][Math.floor(Math.random() * 4)] },
+      ],
+    });
+    for (let i = 0; i < 4; i++) {
+      const a = Math.random() * Math.PI * 2;
+      const v = (4.8 + Math.random() * 2) * SCALE;
+      sparks.push({
+        x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v,
+        rot: Math.random() * Math.PI * 2, rs: (Math.random() - .5) * .28,
+        s: (4 + Math.random() * 3) * SCALE, a: 1, P,
+      });
+    }
+    start();
+  }
+
+  function start() {
+    if (running) return;
+    running = true;
+    last = performance.now();
+    requestAnimationFrame(loop);
+  }
+
+  function weight(t) { return Math.min(2 - Math.abs(4 * (t - .5)), 1); }
+
+  function drawRings(w, p) {
+    const stopAdd = .1, startDim = .4;
+    for (let n = 0; n < 2; n++) {
+      const seg = w.segs[n];
+      const base = w.ang + seg.off;
+      let start, end;
+      if (p <= stopAdd) {
+        end = base + seg.len;
+        start = end - seg.len * (p / stopAdd);
+      } else if (p > startDim) {
+        start = base;
+        end = start + seg.len * (1 - (p - startDim) / (1 - startDim));
+      } else {
+        start = base;
+        end = start + seg.len;
+      }
+      const widthMul = Math.min(-.8 * (p - .8) + 1, 1);
+      const t = Math.min(1.2 * p, 1);
+      const rr = Math.round(w.P.ring0[0] * (1 - t) + w.P.ring1[0] * t);
+      const gg = Math.round(w.P.ring0[1] * (1 - t) + w.P.ring1[1] * t);
+      const bb = Math.round(w.P.ring0[2] * (1 - t) + w.P.ring1[2] * t);
+      const alpha = Math.min(1.1 - .3 * p, 1);
+      const radius = w.r + seg.rate * SCALE;
+      for (let k = 0; k < 10; k++) {
+        const t0 = k / 10, t1 = (k + 1) / 10;
+        const a0 = start + (end - start) * t0;
+        const a1 = start + (end - start) * t1;
+        if (Math.abs(a1 - a0) < .01) continue;
+        const lw = (.4 * (1 - weight(t0)) + 3.3 * weight(t0)) * widthMul * 1.15;
+        ctx.beginPath();
+        ctx.arc(w.x, w.y, radius, a0, a1);
+        ctx.lineWidth = Math.max(lw, .1);
+        ctx.strokeStyle = `rgba(${rr},${gg},${bb},${alpha})`;
+        ctx.stroke();
+      }
+    }
+  }
+
+  function loop(now) {
+    const dt = Math.max(0, Math.min(now - last, 50)) / 16.667;
+    last = now;
+    ctx.clearRect(0, 0, W, H);
+
+    for (let i = waves.length - 1; i >= 0; i--) {
+      const w = waves[i];
+      w.life += dt;
+      const fp = Math.min(w.life / 16, 1);
+      const rp = Math.min(w.life / 23, 1);
+      const ease = 1 - Math.pow(1 - fp, 3);
+      w.r = Math.max(0, 26 * SCALE * ease);
+      const fa = 1 - fp;
+      if (fa > 0) {
+        ctx.beginPath();
+        ctx.arc(w.x, w.y, w.r, 0, 7);
+        ctx.fillStyle = `rgba(${w.P.fill},${(fa * .4).toFixed(3)})`;
+        ctx.fill();
+      }
+      w.ang -= w.rs * dt;
+      drawRings(w, rp);
+      if (fp >= 1 && rp >= 1) waves.splice(i, 1);
+    }
+
+    for (let i = sparks.length - 1; i >= 0; i--) {
+      const s = sparks[i];
+      s.x += s.vx * dt;
+      s.y += s.vy * dt;
+      s.vx *= Math.pow(.9, dt);
+      s.vy *= Math.pow(.9, dt);
+      s.rot += s.rs * dt;
+      s.a -= .032 * dt;
+      if (s.a <= 0) { sparks.splice(i, 1); continue; }
+      ctx.save();
+      ctx.translate(s.x, s.y);
+      ctx.rotate(s.rot);
+      ctx.beginPath();
+      ctx.moveTo(0, -s.s);
+      ctx.lineTo(s.s * .6, s.s * .6);
+      ctx.lineTo(-s.s * .6, s.s * .6);
+      ctx.fillStyle = `rgba(${s.P.spark},${s.a.toFixed(3)})`;
+      ctx.fill();
+      ctx.restore();
+    }
+
+    if (waves.length || sparks.length) requestAnimationFrame(loop);
+    else { running = false; ctx.clearRect(0, 0, W, H); }
+  }
+
+  addEventListener('pointerdown', e => {
+    if (e.button) return;
+    spawn(e.clientX, e.clientY);
+  }, { passive: true });
+
+  addEventListener('click', e => {
+    if (e.detail !== 0) return;
+    const el = e.target.closest('a, button');
+    if (!el) return;
+    const b = el.getBoundingClientRect();
+    spawn(b.left + b.width / 2, b.top + b.height / 2);
+  });
 })();
 
 /* ===== 打字机 ===== */
 (() => {
   const el = document.getElementById('typewriter');
-  const phrases = ['cute Android apps', 'EMOO 图片工具', 'full-stack things', 'tiny warm tools'];
+  const phrases = ['cute Android apps', 'EMOO 图片工具', 'LiveXP 实况模块', 'full-stack things', 'tiny warm tools'];
   let pi = 0, ci = 0, del = false;
   function step() {
     const p = phrases[pi];
@@ -107,45 +338,111 @@
   document.querySelectorAll('main section').forEach(s => secIO.observe(s));
 })();
 
-/* ===== 主题切换（light / system / dark，切换时从点击处圆形扩散，SnowLuma 同款）===== */
+/* ===== 主题切换（黑幕从开关椭圆扩散 / 收缩回去，可随时打断） ===== */
 (() => {
   const root = document.documentElement;
   const mq = matchMedia('(prefers-color-scheme: light)');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const btns = [...document.querySelectorAll('[data-set-theme]')];
-  let lastPoint = null;
-  addEventListener('pointerdown', e => { lastPoint = { x: e.clientX, y: e.clientY }; }, { capture: true });
+  const pill = document.querySelector('.theme-switch');
+  const veil = document.querySelector('.theme-veil');
 
-  function withReveal(update) {
-    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (typeof document.startViewTransition !== 'function' || document.visibilityState === 'hidden' || reduce) {
-      update(); return;
+  let mode = localStorage.getItem('theme-mode') || 'system';
+  let r = 0, cx = 0, cy = 0, openR = 0, closedR = 0;
+  let shown = false, dest = null, raf = 0;
+
+  const effective = m => m === 'system' ? (mq.matches ? 'light' : 'dark') : m;
+  const commit = t => { root.dataset.theme = t; };
+  const mark = () => btns.forEach(b => b.classList.toggle('on', b.dataset.setTheme === mode));
+
+  function geometry() {
+    const b = pill.getBoundingClientRect();
+    cx = b.left + b.width / 2;
+    cy = b.top + b.height / 2;
+    closedR = Math.max(b.width, b.height) / 2 + 2;
+    openR = Math.hypot(Math.max(cx, innerWidth - cx), Math.max(cy, innerHeight - cy)) + 4;
+  }
+  function paint() {
+    veil.style.clipPath = `circle(${r.toFixed(1)}px at ${cx.toFixed(1)}px ${cy.toFixed(1)}px)`;
+  }
+  function show() {
+    if (!shown) { veil.classList.add('on'); shown = true; }
+  }
+  function hide() {
+    veil.classList.remove('on');
+    shown = false;
+  }
+  function stop() {
+    cancelAnimationFrame(raf);
+    raf = 0;
+    dest = null;
+  }
+
+  function tween(to, done) {
+    stop();
+    dest = to;
+    const from = r;
+    const dur = Math.max(170, 480 * Math.abs(to - from) / (openR - closedR || 1));
+    const t0 = performance.now();
+    function step(now) {
+      const p = Math.min(Math.max((now - t0) / dur, 0), 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      r = from + (to - from) * eased;
+      paint();
+      if (p < 1) {
+        raf = requestAnimationFrame(step);
+      } else {
+        raf = 0;
+        dest = null;
+        done();
+      }
     }
-    const x = lastPoint?.x ?? innerWidth / 2;
-    const y = lastPoint?.y ?? innerHeight / 2;
-    const r = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
-    root.style.setProperty('--vt-x', `${x}px`);
-    root.style.setProperty('--vt-y', `${y}px`);
-    root.style.setProperty('--vt-r', `${r}px`);
-    try {
-      const vt = document.startViewTransition(() => {
-        document.body.style.transition = 'none';
-        update();
-      });
-      Promise.resolve(vt?.finished).catch(() => {}).finally(() => {
-        document.body.style.transition = '';
-      });
-    } catch { update(); }
+    raf = requestAnimationFrame(step);
   }
 
-  function apply(mode) {
-    localStorage.setItem('theme-mode', mode);
-    const eff = mode === 'system' ? (mq.matches ? 'light' : 'dark') : mode;
-    root.dataset.theme = eff;
-    btns.forEach(b => b.classList.toggle('on', b.dataset.setTheme === mode));
+  function go(target) {
+    geometry();
+    if (reduce.matches) {
+      stop();
+      hide();
+      commit(target);
+      return;
+    }
+    if (!shown && root.dataset.theme === target) return;
+    const to = target === 'dark' ? openR : closedR;
+    if (shown && dest === to) return;
+    if (!shown) {
+      r = target === 'dark' ? closedR : openR;
+      show();
+      paint();
+    }
+    if (target === 'light' && root.dataset.theme !== 'light') commit('light');
+    tween(to, () => {
+      if (to === openR) {
+        commit('dark');
+        hide();
+      } else {
+        hide();
+      }
+    });
   }
-  btns.forEach(b => b.addEventListener('click', () => withReveal(() => apply(b.dataset.setTheme))));
-  mq.addEventListener('change', () => apply(localStorage.getItem('theme-mode') || 'system'));
-  apply(localStorage.getItem('theme-mode') || 'system');
+
+  btns.forEach(b => b.addEventListener('click', () => {
+    mode = b.dataset.setTheme;
+    try { localStorage.setItem('theme-mode', mode); } catch (e) {}
+    mark();
+    go(effective(mode));
+  }));
+
+  mq.addEventListener('change', () => {
+    if (mode !== 'system') return;
+    stop();
+    hide();
+    commit(effective(mode));
+  });
+
+  commit(effective(mode));
+  mark();
 })();
 
 /* ===== 点击复制联系方式 ===== */
@@ -188,4 +485,35 @@
 (() => {
   const el = document.getElementById('footer-year');
   el.textContent = new Date().getFullYear();
+})();
+
+/* ===== 键盘彩蛋 ===== */
+(() => {
+  const seq = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+  let at = 0;
+  let timer;
+  addEventListener('keydown', e => {
+    if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
+    const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+    if (key === seq[at]) {
+      at++;
+      if (at === seq.length) { at = 0; fire(); }
+    } else {
+      at = key === seq[0] ? 1 : 0;
+    }
+  });
+
+  function fire() {
+    document.dispatchEvent(new CustomEvent('meteor-shower'));
+    let el = document.querySelector('.toast.egg');
+    if (!el) {
+      el = document.createElement('div');
+      el.className = 'toast egg';
+      document.body.append(el);
+    }
+    el.textContent = 'Konami · 老玩家认证';
+    el.classList.add('show');
+    clearTimeout(timer);
+    timer = setTimeout(() => el.classList.remove('show'), 2600);
+  }
 })();

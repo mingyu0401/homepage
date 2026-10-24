@@ -3,14 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>明雨 Mingyu · 个人主页</title>
-<meta name="description" content="明雨的个人主页 —— Android 开发者，EMOO 图片管理与一键发送工具作者">
-<link rel="icon" href="assets/avatar.png" type="image/png">
+<title>明雨愚人</title>
+<meta name="description" content="明雨的个人主页 —— Android 开发者，EMOO、LiveXP 第一作者">
+<link rel="icon" href="assets/favicon.png" type="image/png" sizes="64x64">
+<link rel="preload" as="image" href="assets/avatar.webp" type="image/webp">
+<script>try{var m=localStorage.getItem('theme-mode')||'system';document.documentElement.dataset.theme=m==='system'?(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'):m}catch(e){}</script>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <canvas id="starfield" aria-hidden="true"></canvas>
 <div class="meteor-field" aria-hidden="true"></div>
+<canvas id="fx" aria-hidden="true"></canvas>
+<div class="theme-veil" aria-hidden="true"></div>
 
 <header class="site-header">
   <nav class="nav glass">
@@ -43,7 +47,7 @@
   <section id="hero" class="hero">
     <div class="avatar-wrap reveal">
       <div class="avatar-ring"></div>
-      <img src="assets/avatar.png" alt="明雨的头像" class="avatar">
+      <img src="assets/avatar.webp" alt="明雨的头像" class="avatar" width="128" height="128" fetchpriority="high">
       <span class="status-dot" title="在线"></span>
     </div>
 
@@ -157,10 +161,10 @@
       <div class="emoo-body">
         <div class="emoo-head">
           <span class="emoo-badge">Android · Xposed · 开源</span>
-          <h3>LiveXP —— 让 QQ 聊天支持「实况照片」的 Xposed 模块</h3>
+          <h3>LiveXP —— 让 大而美的聊天软件 支持「实况照片」的 Xposed 模块</h3>
         </div>
         <ul class="emoo-feats">
-          <li><b>实况角标</b><span>自动识别聊天里的实况图片（Live Photo / Motion Photo），气泡右上角显示点环角标</span></li>
+          <li><b>实况角标</b><span>自动识别聊天里的实况图片，气泡右上角显示实况角标</span></li>
           <li><b>实况播放</b><span>点开大图自动播放内嵌的动态视频，看完自动回到照片</span></li>
           <li><b>翻页续播</b><span>相册里左右滑动到下一张实况图自动续播，拖动即停</span></li>
           <li><b>超级适配</b><span>谷歌 OPPO 小米 荣耀 魅族 三星 vivo单文件 实况照片测试全部通过</span></li>

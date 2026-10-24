@@ -1,7 +1,9 @@
 /* ============ 主题变量 ============ */
 :root {
+  color-scheme: dark;
   --bg: #0b0e17;
   --bg-soft: #121627;
+  --veil: #0b0e17;
   --text: #e8eaf2;
   --text-dim: #9aa3b8;
   --accent: #f9a86c;
@@ -13,6 +15,7 @@
   --nav-h: 56px;
 }
 [data-theme="light"] {
+  color-scheme: light;
   --bg: #f5f2ee;
   --bg-soft: #ffffff;
   --text: #23262f;
@@ -31,13 +34,19 @@ body {
   background: var(--bg);
   color: var(--text);
   overflow-x: hidden;
-  transition: background .5s, color .5s;
 }
 a { color: inherit; text-decoration: none; }
 ::selection { background: var(--accent-2); color: #fff; }
 
 /* ============ 背景星空 ============ */
 #starfield { position: fixed; inset: 0; z-index: -2; }
+#fx { position: fixed; inset: 0; z-index: 60; pointer-events: none; }
+.theme-veil {
+  position: fixed; inset: 0; z-index: 9999;
+  background: var(--veil); pointer-events: none;
+  display: none; will-change: clip-path;
+}
+.theme-veil.on { display: block; }
 .meteor-field {
   position: fixed; inset: -20%; z-index: -1; pointer-events: none;
   background:
@@ -281,18 +290,6 @@ a { color: inherit; text-decoration: none; }
 .theme-switch button.on { color: #1b1208; }
 .theme-switch button.on .sw-dot { opacity: 1; scale: 1; }
 .theme-switch button svg { position: relative; z-index: 1; width: 16px; height: 16px; }
-
-/* ============ 主题切换圆形扩散动画（View Transitions，按屏幕原生刷新率渲染） ============ */
-::view-transition-old(root) { mix-blend-mode: normal; animation: none; z-index: 0; }
-::view-transition-new(root) { mix-blend-mode: normal; animation: none; z-index: 1; }
-::view-transition-new(root) { animation: .5s cubic-bezier(.16, 1, .3, 1) theme-reveal; }
-@keyframes theme-reveal {
-  0% { clip-path: circle(0px at var(--vt-x, 50%) var(--vt-y, 50%)); }
-  to { clip-path: circle(var(--vt-r, 150%) at var(--vt-x, 50%) var(--vt-y, 50%)); }
-}
-@media (prefers-reduced-motion: reduce) {
-  ::view-transition-old(root), ::view-transition-new(root) { animation: none !important; }
-}
 
 /* ============ 滚动显现 ============ */
 .reveal { opacity: 0; transform: translateY(26px); transition: opacity .8s ease, transform .8s cubic-bezier(.2, .9, .3, 1); }
