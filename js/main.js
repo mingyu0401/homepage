@@ -205,6 +205,7 @@
   function start() {
     if (running) return;
     running = true;
+    cv.classList.add('live');
     last = performance.now();
     requestAnimationFrame(loop);
   }
@@ -295,7 +296,7 @@
     }
 
     if (waves.length || sparks.length) requestAnimationFrame(loop);
-    else { running = false; ctx.clearRect(0, 0, W, H); }
+    else { running = false; cv.classList.remove('live'); ctx.clearRect(0, 0, W, H); }
   }
 
   addEventListener('pointerdown', e => {
@@ -315,7 +316,17 @@
 /* ===== 打字机 ===== */
 (() => {
   const el = document.getElementById('typewriter');
+  const ghost = document.getElementById('tw-ghost');
   const phrases = ['cute Android apps', 'EMOO 图片工具', 'LiveXP 实况模块', 'full-stack things', 'tiny warm tools'];
+  if (ghost) {
+    let widest = ghost.textContent, w = 0;
+    for (const p of phrases) {
+      ghost.textContent = p;
+      const cw = ghost.offsetWidth;
+      if (cw > w) { w = cw; widest = p; }
+    }
+    ghost.textContent = widest;
+  }
   let pi = 0, ci = 0, del = false;
   function step() {
     const p = phrases[pi];
