@@ -78,11 +78,10 @@ body.theme-transition *::after {
   animation: nav-drop .7s cubic-bezier(.2, .9, .3, 1.2) both;
 }
 @keyframes nav-drop { from { transform: translateY(-70px); opacity: 0; } }
-/* 滑动指示块：在四个导航项之间平移，代替原来的渐变高亮 */
+/* 滑动指示块：在四个导航项之间平移，accent 底色形成明显高亮 */
 .nav-pill {
   position: absolute; top: 6px; bottom: 6px; left: 0; width: 0;
-  border-radius: 10px; background: var(--glass);
-  box-shadow: inset 0 0 0 1px var(--glass-border);
+  border-radius: 10px; background: var(--accent);
   transition: transform .35s cubic-bezier(.2, .9, .3, 1.2), width .35s cubic-bezier(.2, .9, .3, 1.2);
   pointer-events: none;
 }
@@ -93,7 +92,7 @@ body.theme-transition *::after {
   color: var(--text-dim); transition: color .25s, background-color .25s;
 }
 .nav-link:hover { color: var(--text); background: var(--glass); }
-.nav-link.active { color: var(--text); }
+.nav-link.active { color: #1b1208; font-weight: 600; }
 .nav-link.active:hover { background: transparent; }
 .nav-link .i { width: 15px; height: 15px; }
 
