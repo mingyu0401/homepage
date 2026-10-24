@@ -158,3 +158,9 @@
   });
   cta.addEventListener('mouseleave', () => cta.style.transform = '');
 })();
+
+/* ===== 页脚年份自动更新 ===== */
+(() => {
+  const el = document.getElementById('footer-year');
+  el.textContent = new Date().getFullYear();
+})();
