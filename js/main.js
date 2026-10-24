@@ -57,8 +57,8 @@
     meteors.push({
       x: x ?? Math.random() * W * .9,
       y: y ?? (shower ? -Math.random() * H * .3 : -20),
-      len: Math.random() * 120 + 80,
-      v: (Math.random() * 6 + 7) * (shower ? 1.4 : 1),
+      len: Math.random() * 170 + 190,
+      v: (Math.random() * 9 + 15) * (shower ? 1.4 : 1),
       ang: Math.PI / 3.4 + (shower ? (Math.random() - .5) * .5 : 0),
       life: 1,
     });
@@ -134,11 +134,16 @@
       g.addColorStop(0, `rgba(190,228,255,${a.toFixed(3)})`);
       g.addColorStop(1, 'rgba(140,200,255,0)');
       ctx.strokeStyle = g;
-      ctx.lineWidth = 1.4;
+      ctx.lineWidth = 2.4;
       ctx.beginPath();
       ctx.moveTo(m.x, m.y);
       ctx.lineTo(tx, ty);
       ctx.stroke();
+      // 头部亮点，让流星更像“流星”而不是一条细线
+      ctx.beginPath();
+      ctx.arc(m.x, m.y, 1.8, 0, 7);
+      ctx.fillStyle = `rgba(225,242,255,${(a * .9).toFixed(3)})`;
+      ctx.fill();
       if (m.life <= 0 || m.y > H + 80 || m.x > W + 80) meteors.splice(i, 1);
     }
   }
