@@ -305,6 +305,13 @@ body.theme-transition *::after {
   box-shadow: var(--shadow);
   animation: nav-drop .7s .1s cubic-bezier(.2, .9, .3, 1.2) both;
 }
+/* 滑动圆块：在三个图标按钮之间平移，代替原来的渐显圆点 */
+.theme-switch .sw-pill {
+  position: absolute; left: 3px; top: 3px;
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--accent); pointer-events: none;
+  transition: transform .32s cubic-bezier(.2, .9, .3, 1.3);
+}
 .theme-switch button {
   all: unset; cursor: pointer;
   position: relative; display: flex; align-items: center; justify-content: center;
@@ -314,13 +321,7 @@ body.theme-transition *::after {
 }
 .theme-switch button:hover { color: var(--text); }
 .theme-switch button:active { scale: .94; }
-.theme-switch .sw-dot {
-  position: absolute; inset: 5px; border-radius: 50%;
-  background: var(--accent); opacity: 0; scale: .6;
-  transition: opacity .2s ease-out, scale .2s ease-out;
-}
 .theme-switch button.on { color: #1b1208; }
-.theme-switch button.on .sw-dot { opacity: 1; scale: 1; }
 .theme-switch button svg { position: relative; z-index: 1; width: 16px; height: 16px; }
 
 /* 浅色模式下切换模组保持黑底，收缩的黑幕椭圆正好落回按钮里 */

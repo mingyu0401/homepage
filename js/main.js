@@ -408,6 +408,7 @@
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const btns = [...document.querySelectorAll('[data-set-theme]')];
   const pill = document.querySelector('.theme-switch');
+  const swPill = document.querySelector('.sw-pill');
   const veil = document.querySelector('.theme-veil');
 
   let mode = localStorage.getItem('theme-mode') || 'system';
@@ -417,7 +418,19 @@
 
   const effective = m => m === 'system' ? (mq.matches ? 'light' : 'dark') : m;
   const commit = t => { root.dataset.theme = t; };
-  const mark = () => btns.forEach(b => b.classList.toggle('on', b.dataset.setTheme === mode));
+  function mark(animate = true) {
+    btns.forEach(b => b.classList.toggle('on', b.dataset.setTheme === mode));
+    if (!swPill) return;
+    const on = btns.find(b => b.dataset.setTheme === mode) || btns[0];
+    if (!animate) {
+      swPill.style.transition = 'none';
+      swPill.style.transform = `translateX(${on.offsetLeft - btns[0].offsetLeft}px)`;
+      void swPill.offsetWidth;
+      swPill.style.transition = '';
+    } else {
+      swPill.style.transform = `translateX(${on.offsetLeft - btns[0].offsetLeft}px)`;
+    }
+  }
 
   function geometry() {
     const b = pill.getBoundingClientRect();
@@ -521,7 +534,7 @@
   });
 
   commit(effective(mode));
-  mark();
+  mark(false);
 })();
 
 /* ===== 点击复制联系方式 ===== */
