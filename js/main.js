@@ -10,28 +10,48 @@
   let lightTarget = lightMix;
   let last = performance.now();
 
-  function resize() {
-    W = innerWidth; H = innerHeight;
-    cv.width = Math.floor(W * DPR);
-    cv.height = Math.floor(H * DPR);
+  function makeStar() {
+    const r = Math.random() * 1.2 + .35;
+    return {
+      x: Math.random() * W, y: Math.random() * H, r,
+      len: r * 7 + Math.random() * 7,
+      a: Math.random(), va: (Math.random() * .012 + .003) * (Math.random() < .5 ? 1 : -1),
+      vy: Math.random() * .05 + .01,
+      rain: Math.random() * 2.2 + 1.9,
+    };
+  }
+
+  function layout() {
+    const w = innerWidth, h = innerHeight;
+    if (w === W && h === H) return;
+    const prevW = W;
+    W = w; H = h;
+    const pw = Math.floor(W * DPR), ph = Math.floor(H * DPR);
     cv.style.width = W + 'px';
     cv.style.height = H + 'px';
+    if (cv.width !== pw) cv.width = pw;
+    if (cv.height !== ph) cv.height = ph;
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    const n = Math.floor(W / 6);
-    stars = Array.from({ length: n }, () => {
-      const r = Math.random() * 1.2 + .35;
-      return {
-        x: Math.random() * W, y: Math.random() * H, r,
-        len: r * 7 + Math.random() * 7,
-        a: Math.random(), va: (Math.random() * .012 + .003) * (Math.random() < .5 ? 1 : -1),
-        vy: Math.random() * .05 + .01,
-        rain: Math.random() * 2.2 + 1.9,
-      };
-    });
-    meteors = [];
+
+    if (!stars.length) {
+      const count = Math.max(40, Math.floor(W / 6));
+      for (let i = 0; i < count; i++) stars.push(makeStar());
+      return;
+    }
+    if (prevW && prevW !== W) {
+      const k = W / prevW;
+      for (const s of stars) s.x *= k;
+    }
+    const count = Math.max(40, Math.floor(W / 6));
+    if (count > stars.length) {
+      for (let i = stars.length; i < count; i++) stars.push(makeStar());
+    } else if (count < stars.length) {
+      stars.length = count;
+    }
+    if (!reduce) tick(performance.now());
   }
-  addEventListener('resize', resize);
-  resize();
+  addEventListener('resize', layout);
+  layout();
 
   function spawnMeteor(x, y, shower) {
     meteors.push({
@@ -144,10 +164,11 @@
 
   function resize() {
     W = innerWidth; H = innerHeight;
-    cv.width = Math.floor(W * DPR);
-    cv.height = Math.floor(H * DPR);
+    const pw = Math.floor(W * DPR), ph = Math.floor(H * DPR);
     cv.style.width = W + 'px';
     cv.style.height = H + 'px';
+    if (cv.width !== pw) cv.width = pw;
+    if (cv.height !== ph) cv.height = ph;
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   }
   addEventListener('resize', resize);
@@ -313,34 +334,58 @@
   const el = document.getElementById('tech-rotator');
   const list = ['Android', 'Kotlin', 'Vue', 'Node.js', 'Compose'];
   let i = 0;
-  setInterval(() => {
+  function cycle() {
     el.style.opacity = 0; el.style.transform = 'translateY(-6px)';
     setTimeout(() => {
       i = (i + 1) % list.length;
       el.textContent = list[i];
       el.style.opacity = 1; el.style.transform = 'none';
+      setTimeout(cycle, 1950);
     }, 250);
-  }, 2200);
+  }
+  setTimeout(cycle, 2200);
 })();
 
 /* ===== 滚动显现 + 导航高亮 ===== */
 (() => {
-  const io = new IntersectionObserver(es => es.forEach(e => {
-    if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+  const revealIO = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('in'); revealIO.unobserve(e.target); }
   }), { threshold: .15 });
-  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+  document.querySelectorAll('.reveal').forEach(el => revealIO.observe(el));
 
   const links = [...document.querySelectorAll('.nav-link')];
-  const secIO = new IntersectionObserver(es => es.forEach(e => {
-    if (!e.isIntersecting) return;
-    links.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + e.target.id));
-  }), { threshold: .4 });
-  document.querySelectorAll('main section').forEach(s => secIO.observe(s));
+  const sections = [...document.querySelectorAll('main section')];
+  const targets = new Map(links.map(l => [l.getAttribute('href').slice(1), l]));
+  let active = 'hero';
+  let queued = false;
+
+  function update() {
+    queued = false;
+    const line = innerHeight * .35;
+    let id = sections[0]?.id;
+    for (const s of sections) {
+      if (s.getBoundingClientRect().top <= line) id = s.id;
+    }
+    if (!id || id === active) return;
+    const next = targets.get(id);
+    if (!next) return;
+    active = id;
+    links.forEach(l => l.classList.toggle('active', l === next));
+  }
+  function queueUpdate() {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(update);
+  }
+  addEventListener('scroll', queueUpdate, { passive: true });
+  addEventListener('resize', queueUpdate);
+  update();
 })();
 
-/* ===== 主题切换（黑幕从开关椭圆扩散 / 收缩回去，可随时打断） ===== */
+/* ===== 主题切换（黑幕从开关椭圆扩散 / 收回，可随时打断） ===== */
 (() => {
   const root = document.documentElement;
+  const body = document.body;
   const mq = matchMedia('(prefers-color-scheme: light)');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const btns = [...document.querySelectorAll('[data-set-theme]')];
@@ -348,7 +393,8 @@
   const veil = document.querySelector('.theme-veil');
 
   let mode = localStorage.getItem('theme-mode') || 'system';
-  let r = 0, cx = 0, cy = 0, openR = 0, closedR = 0;
+  let coverage = 0; // 0 = 收到开关椭圆大小，1 = 铺满全屏
+  let cx = 0, cy = 0, rx0 = 0, ry0 = 0, rx1 = 0, ry1 = 0;
   let shown = false, dest = null, raf = 0;
 
   const effective = m => m === 'system' ? (mq.matches ? 'light' : 'dark') : m;
@@ -359,17 +405,28 @@
     const b = pill.getBoundingClientRect();
     cx = b.left + b.width / 2;
     cy = b.top + b.height / 2;
-    closedR = Math.max(b.width, b.height) / 2 + 2;
-    openR = Math.hypot(Math.max(cx, innerWidth - cx), Math.max(cy, innerHeight - cy)) + 4;
+    rx0 = b.width / 2 + 2;
+    ry0 = b.height / 2 + 2;
+    const dx = Math.max(cx, innerWidth - cx);
+    const dy = Math.max(cy, innerHeight - cy);
+    // 椭圆长轴需超过对角距离的 1/√2 倍才能覆盖四角
+    rx1 = dx * 1.45 + 4;
+    ry1 = dy * 1.45 + 4;
   }
   function paint() {
-    veil.style.clipPath = `circle(${r.toFixed(1)}px at ${cx.toFixed(1)}px ${cy.toFixed(1)}px)`;
+    const rx = rx0 + (rx1 - rx0) * coverage;
+    const ry = ry0 + (ry1 - ry0) * coverage;
+    veil.style.clipPath = `ellipse(${rx.toFixed(1)}px ${ry.toFixed(1)}px at ${cx.toFixed(1)}px ${cy.toFixed(1)}px)`;
   }
   function show() {
-    if (!shown) { veil.classList.add('on'); shown = true; }
+    if (shown) return;
+    body.classList.add('theme-transition');
+    veil.classList.add('on');
+    shown = true;
   }
   function hide() {
     veil.classList.remove('on');
+    body.classList.remove('theme-transition');
     shown = false;
   }
   function stop() {
@@ -381,13 +438,13 @@
   function tween(to, done) {
     stop();
     dest = to;
-    const from = r;
-    const dur = Math.max(170, 480 * Math.abs(to - from) / (openR - closedR || 1));
+    const from = coverage;
+    const dur = Math.max(180, 480 * Math.abs(to - from));
     const t0 = performance.now();
     function step(now) {
       const p = Math.min(Math.max((now - t0) / dur, 0), 1);
       const eased = 1 - Math.pow(1 - p, 3);
-      r = from + (to - from) * eased;
+      coverage = from + (to - from) * eased;
       paint();
       if (p < 1) {
         raf = requestAnimationFrame(step);
@@ -409,16 +466,16 @@
       return;
     }
     if (!shown && root.dataset.theme === target) return;
-    const to = target === 'dark' ? openR : closedR;
+    const to = target === 'dark' ? 1 : 0;
     if (shown && dest === to) return;
     if (!shown) {
-      r = target === 'dark' ? closedR : openR;
+      coverage = target === 'dark' ? 0 : 1;
       show();
       paint();
     }
     if (target === 'light' && root.dataset.theme !== 'light') commit('light');
     tween(to, () => {
-      if (to === openR) {
+      if (to === 1) {
         commit('dark');
         hide();
       } else {
