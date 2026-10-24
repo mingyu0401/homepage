@@ -406,7 +406,7 @@
   let mode = localStorage.getItem('theme-mode') || 'system';
   let coverage = 0; // 0 = 收到开关椭圆大小，1 = 铺满全屏
   let cx = 0, cy = 0, rx0 = 0, ry0 = 0, rx1 = 0, ry1 = 0;
-  let shown = false, dest = null, raf = 0;
+  let shown = false, dest = null, raf = 0, fadeTimer = 0;
 
   const effective = m => m === 'system' ? (mq.matches ? 'light' : 'dark') : m;
   const commit = t => { root.dataset.theme = t; };
@@ -431,11 +431,21 @@
   }
   function show() {
     if (shown) return;
+    clearTimeout(fadeTimer);
     body.classList.add('theme-transition');
     veil.classList.add('on');
     shown = true;
   }
-  function hide() {
+  // 遮罩收回到开关里，颜色渐变再多留一会儿再摘掉过渡类
+  function endVeil() {
+    veil.classList.remove('on');
+    shown = false;
+    clearTimeout(fadeTimer);
+    fadeTimer = setTimeout(() => body.classList.remove('theme-transition'), 450);
+  }
+  function reset() {
+    stop();
+    clearTimeout(fadeTimer);
     veil.classList.remove('on');
     body.classList.remove('theme-transition');
     shown = false;
@@ -471,8 +481,7 @@
   function go(target) {
     geometry();
     if (reduce.matches) {
-      stop();
-      hide();
+      reset();
       commit(target);
       return;
     }
@@ -484,15 +493,11 @@
       show();
       paint();
     }
-    if (target === 'light' && root.dataset.theme !== 'light') commit('light');
-    tween(to, () => {
-      if (to === 1) {
-        commit('dark');
-        hide();
-      } else {
-        hide();
-      }
-    });
+    if (root.dataset.theme !== target) {
+      void body.offsetWidth; // 先让渐变规则生效，再切主题色
+      commit(target);
+    }
+    tween(to, endVeil);
   }
 
   btns.forEach(b => b.addEventListener('click', () => {
@@ -504,8 +509,7 @@
 
   mq.addEventListener('change', () => {
     if (mode !== 'system') return;
-    stop();
-    hide();
+    reset();
     commit(effective(mode));
   });
 

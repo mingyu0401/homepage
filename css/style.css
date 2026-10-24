@@ -40,15 +40,23 @@ a { color: inherit; text-decoration: none; }
 
 /* ============ 背景星空 ============ */
 #starfield { position: fixed; inset: 0; z-index: -2; pointer-events: none; }
-body.theme-transition #starfield { z-index: 9500; }
 #fx { position: fixed; inset: 0; z-index: 60; pointer-events: none; visibility: hidden; }
 #fx.live { visibility: visible; }
+/* 主题切换遮罩在所有组件之下，只盖住页面底色 */
 .theme-veil {
-  position: fixed; inset: 0; z-index: 9000;
+  position: fixed; inset: 0; z-index: -3;
   background: var(--veil); pointer-events: none;
   display: none;
 }
 .theme-veil.on { display: block; will-change: clip-path; }
+/* 遮罩在内容下方时，文字/卡片颜色必须跟着渐变，否则会出现深色字压深色底 */
+body.theme-transition,
+body.theme-transition *,
+body.theme-transition *::before,
+body.theme-transition *::after {
+  transition: background-color .42s ease, color .42s ease, border-color .42s ease,
+    fill .42s ease, stroke .42s ease, box-shadow .42s ease;
+}
 .meteor-field {
   position: fixed; inset: -20%; z-index: -1; pointer-events: none;
   background:
