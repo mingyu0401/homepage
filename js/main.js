@@ -367,9 +367,15 @@
   const links = [...document.querySelectorAll('.nav-link')];
   const sections = [...document.querySelectorAll('main section')];
   const targets = new Map(links.map(l => [l.getAttribute('href').slice(1), l]));
+  const navPill = document.querySelector('.nav-pill');
   let active = 'hero';
   let queued = false;
 
+  function movePill(link) {
+    if (!navPill || !link) return;
+    navPill.style.width = link.offsetWidth + 'px';
+    navPill.style.transform = `translateX(${link.offsetLeft}px)`;
+  }
   function update() {
     queued = false;
     const line = innerHeight * .35;
@@ -377,11 +383,12 @@
     for (const s of sections) {
       if (s.getBoundingClientRect().top <= line) id = s.id;
     }
-    if (!id || id === active) return;
-    const next = targets.get(id);
-    if (!next) return;
-    active = id;
-    links.forEach(l => l.classList.toggle('active', l === next));
+    const next = id && targets.get(id);
+    if (next && id !== active) {
+      active = id;
+      links.forEach(l => l.classList.toggle('active', l === next));
+    }
+    movePill(next || targets.get(active));
   }
   function queueUpdate() {
     if (queued) return;

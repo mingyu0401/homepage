@@ -72,18 +72,29 @@ body.theme-transition *::after {
   display: flex; justify-content: center;
 }
 .nav {
+  position: relative;
   display: flex; gap: 4px; padding: 6px 10px;
   border-radius: 14px; box-shadow: var(--shadow);
   animation: nav-drop .7s cubic-bezier(.2, .9, .3, 1.2) both;
 }
 @keyframes nav-drop { from { transform: translateY(-70px); opacity: 0; } }
+/* 滑动指示块：在四个导航项之间平移，代替原来的渐变高亮 */
+.nav-pill {
+  position: absolute; top: 6px; bottom: 6px; left: 0; width: 0;
+  border-radius: 10px; background: var(--glass);
+  box-shadow: inset 0 0 0 1px var(--glass-border);
+  transition: transform .35s cubic-bezier(.2, .9, .3, 1.2), width .35s cubic-bezier(.2, .9, .3, 1.2);
+  pointer-events: none;
+}
 .nav-link {
+  position: relative;
   display: flex; align-items: center; gap: 6px;
   padding: 8px 16px; border-radius: 10px; font-size: 14px;
-  color: var(--text-dim); transition: all .25s;
+  color: var(--text-dim); transition: color .25s, background-color .25s;
 }
 .nav-link:hover { color: var(--text); background: var(--glass); }
-.nav-link.active { color: var(--text); background: var(--glass); box-shadow: inset 0 0 0 1px var(--glass-border); }
+.nav-link.active { color: var(--text); }
+.nav-link.active:hover { background: transparent; }
 .nav-link .i { width: 15px; height: 15px; }
 
 .glass {
