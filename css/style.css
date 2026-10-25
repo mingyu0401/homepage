@@ -5,7 +5,7 @@
   --bg-soft: #121627;
   --veil: #0b0e17;
   --text: #e8eaf2;
-  --text-dim: #9aa3b8;
+  --text-dim: #b8c0d4;
   --accent: #f9a86c;
   --accent-2: #ff7fa5;
   --accent-grad: linear-gradient(120deg, #f9a86c, #ff7fa5);
@@ -353,6 +353,10 @@ body.holding { user-select: none; }
 .hero .reveal:nth-child(6) { transition-delay: .46s; }
 .hero .reveal:nth-child(7) { transition-delay: .54s; }
 .hero .reveal:nth-child(8) { transition-delay: .62s; }
+/* 同一标签页会话内的重载（浏览器丢弃恢复 / 手动刷新）跳过入场动画，
+   避免内容再“刷新”一遍 */
+html.no-intro .reveal { opacity: 1; transform: none; transition: none; }
+html.no-intro .nav, html.no-intro .theme-switch { animation: none; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }

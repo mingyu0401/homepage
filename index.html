@@ -8,7 +8,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png?v=2">
 <link rel="icon" type="image/png" sizes="128x128" href="assets/favicon.png?v=2">
 <link rel="preload" as="image" href="assets/avatar.webp" type="image/webp">
-<script>try{var m=localStorage.getItem('theme-mode')||'system';document.documentElement.dataset.theme=m==='system'?(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'):m}catch(e){}</script>
+<script>try{var m=localStorage.getItem('theme-mode')||'system';document.documentElement.dataset.theme=m==='system'?(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'):m;var s=sessionStorage,t=+s.getItem('alive')||0,n=Date.now();if(t&&n-t<432e5)document.documentElement.classList.add('no-intro');s.setItem('alive',String(n))}catch(e){}</script>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>

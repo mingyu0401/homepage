@@ -155,6 +155,26 @@
       const alpha = s.a * .8 * (1 - mix) + (s.a * .3 + .2) * mix;
       ctx.strokeStyle = `rgba(${cr},${cg},${cb},${alpha.toFixed(3)})`;
       if (mix < .02) {
+        // 旋转时沿轨道后方补一小段渐隐拖影（平时星点是纯圆点，不画尾巴）
+        if (spin > .02) {
+          const lag = .09 * spin;
+          const dx0 = s.x - ax, dy0 = s.y - ay;
+          let px = s.x, py = s.y;
+          ctx.lineWidth = Math.max(.7, s.r * 1.1);
+          for (let k = 1; k <= 3; k++) {
+            const ang = -lag * k / 3;
+            const ca = Math.cos(ang), sa = Math.sin(ang);
+            const nx = ax + dx0 * ca - dy0 * sa;
+            const ny = ay + dx0 * sa + dy0 * ca;
+            ctx.strokeStyle = `rgba(${cr},${cg},${cb},${(alpha * .5 * (1 - k / 3.5)).toFixed(3)})`;
+            ctx.beginPath();
+            ctx.moveTo(px, py);
+            ctx.lineTo(nx, ny);
+            ctx.stroke();
+            px = nx; py = ny;
+          }
+          ctx.strokeStyle = `rgba(${cr},${cg},${cb},${alpha.toFixed(3)})`;
+        }
         ctx.beginPath();
         ctx.arc(s.x, s.y, s.r, 0, 7);
         ctx.fillStyle = ctx.strokeStyle;
@@ -380,15 +400,24 @@
     ghost.textContent = widest;
   }
   let pi = 0, ci = 0, del = false;
-  let timer = 0, running = false;
+  let timer = 0, running = false, lastAt = 0, lastWait = 0;
   function step() {
     timer = 0;
+    const now = performance.now();
+    // 系统休眠/长卡顿恢复：跳过补帧，重新排程，界面不会凭空跳字
+    if (lastAt && now - lastAt > lastWait * 8 + 600) {
+      lastAt = now;
+      timer = setTimeout(step, 200);
+      return;
+    }
+    lastAt = now;
     const p = phrases[pi];
     ci += del ? -1 : 1;
     el.textContent = p.slice(0, ci);
     let wait = del ? 45 : 95;
     if (!del && ci === p.length) { del = true; wait = 1600; }
     else if (del && ci === 0) { del = false; pi = (pi + 1) % phrases.length; wait = 400; }
+    lastWait = wait;
     timer = setTimeout(step, wait);
   }
   // 后台标签页的定时器会被浏览器节流，节流波动时积压的链条会爆发式补跑，
@@ -410,9 +439,16 @@
   let i = 0, t1 = 0, t2 = 0, running = false;
   function cycle() {
     t1 = 0;
+    const started = performance.now();
     el.style.opacity = 0; el.style.transform = 'translateY(-6px)';
     t2 = setTimeout(() => {
       t2 = 0;
+      // 系统休眠/长卡顿恢复：不切换内容，直接排下一轮，避免“凭空刷新”
+      if (performance.now() - started > 2500) {
+        el.style.opacity = 1; el.style.transform = 'none';
+        t1 = setTimeout(cycle, 1950);
+        return;
+      }
       i = (i + 1) % list.length;
       el.textContent = list[i];
       el.style.opacity = 1; el.style.transform = 'none';
@@ -440,7 +476,12 @@
   const revealIO = new IntersectionObserver(es => es.forEach(e => {
     if (e.isIntersecting) { e.target.classList.add('in'); revealIO.unobserve(e.target); }
   }), { threshold: .15 });
-  document.querySelectorAll('.reveal').forEach(el => revealIO.observe(el));
+  // 会话内重载：直接呈现，不重新播放入场动画
+  if (document.documentElement.classList.contains('no-intro')) {
+    document.querySelectorAll('.reveal').forEach(el => el.classList.add('in'));
+  } else {
+    document.querySelectorAll('.reveal').forEach(el => revealIO.observe(el));
+  }
 
   const links = [...document.querySelectorAll('.nav-link')];
   const sections = [...document.querySelectorAll('main section')];
