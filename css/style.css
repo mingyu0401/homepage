@@ -208,7 +208,7 @@ body.holding { user-select: none; }
 }
 .social:hover::after, .social:focus-visible::after { opacity: 1; transform: translate(-50%, 0); }
 .social:hover::before, .social:focus-visible::before { opacity: 1; }
-.qq-icon, .wx-icon { width: 24px; height: 24px; flex: none; display: block; }
+.qq-icon, .wx-icon, .cool-icon { width: 24px; height: 24px; flex: none; display: block; }
 #ghg stop { animation: gh-cycle 9s linear infinite; }
 #ghg .gs2 { animation-delay: -3s; }
 #ghg .gs3 { animation-delay: -6s; }
