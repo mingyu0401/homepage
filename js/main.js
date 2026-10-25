@@ -58,7 +58,7 @@
       x: x ?? Math.random() * W * .9,
       y: y ?? (shower ? -Math.random() * H * .3 : -20),
       len: Math.random() * 170 + 190,
-      v: (Math.random() * 9 + 15) * (shower ? 1.4 : 1),
+      v: (Math.random() * 12 + 24) * (shower ? 1.4 : 1),
       ang: Math.PI / 3.4 + (shower ? (Math.random() - .5) * .5 : 0),
       life: 1,
     });
