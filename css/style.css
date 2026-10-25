@@ -184,7 +184,8 @@ body.holding { user-select: none; }
   transition: all .3s cubic-bezier(.2, .9, .3, 1.4);
 }
 .social svg { width: 27px; height: 27px; }
-.social svg.qq-icon { width: 24px; height: 24px; }
+/* 描边图标自带视框内边距，放大一点让四个图标的视觉大小一致 */
+.social .s-mail, .social .s-chat { transform: scale(1.16); }
 .qq-icon, .wx-icon { width: 24px; height: 24px; flex: none; display: block; }
 .social-label { font-size: 13px; letter-spacing: .3px; }
 .social:hover, .social:focus-visible {

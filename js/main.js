@@ -19,7 +19,7 @@
       len: r * 7 + Math.random() * 7,
       a: Math.random(), va: (Math.random() * .012 + .003) * (Math.random() < .5 ? 1 : -1),
       vy: Math.random() * .05 + .01,
-      rain: Math.random() * 2.2 + 1.9,
+      rain: (Math.random() * 2.2 + 1.9) * .6,
     };
   }
 
