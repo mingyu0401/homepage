@@ -11,7 +11,6 @@
   let last = performance.now();
   // 长按彩蛋：holdMix 0→1 平滑进出，浅色=雨滴定格后逆流，深色=星点绕头像旋转
   let holdMix = 0, holding = false, holdTimer = 0, ax = 0, ay = 0;
-  let spinMix = 0, spinVel = 0;
 
   function makeStar() {
     const r = Math.random() * 1.2 + .35;
@@ -121,11 +120,7 @@
     if (Math.abs(holdTo - holdMix) < .002) holdMix = holdTo;
     // 1 = 下落，0 = 定格成点，-1 = 全速逆流；拖尾长度与方向随它连续变化
     const rainDir = 1 - 2 * holdMix;
-    // 旋转用二阶临界阻尼：起转从零速缓入、松手同样缓出，两端手感一致
-    spinVel += ((holdTo - spinMix) * .006 - spinVel * .16) * dt;
-    spinMix += spinVel * dt;
-    if (Math.abs(holdTo - spinMix) < .002 && Math.abs(spinVel) < .002) { spinMix = holdTo; spinVel = 0; }
-    const spin = Math.max(0, Math.min(1, spinMix)) * (1 - mix); // 旋转彩蛋只在深色（星空）下生效
+    const spin = holdMix * (1 - mix); // 旋转彩蛋只在深色（星空）下生效
     ctx.clearRect(0, 0, W, H);
 
     const cr = Math.round(255 - 165 * mix);
@@ -142,7 +137,8 @@
       else if (s.a < .05) { s.a = .05; s.va *= -1; }
 
       if (spin > .002) {
-        const dth = .022 * spin * dt;
+        // canvas 的 y 轴向下，负角度才是视觉上的逆时针
+        const dth = -.022 * spin * dt;
         const co = Math.cos(dth), si = Math.sin(dth);
         const dx = s.x - ax, dy = s.y - ay;
         s.x = ax + dx * co - dy * si;
@@ -167,7 +163,7 @@
           let px = s.x, py = s.y;
           ctx.lineWidth = Math.max(.7, s.r * 1.1);
           for (let k = 1; k <= 3; k++) {
-            const ang = -lag * k / 3;
+            const ang = lag * k / 3; // 与旋转方向相反，拖影始终落在运动后方
             const ca = Math.cos(ang), sa = Math.sin(ang);
             const nx = ax + dx0 * ca - dy0 * sa;
             const ny = ay + dx0 * sa + dy0 * ca;
@@ -572,7 +568,7 @@
   function show() {
     if (shown) return;
     clearTimeout(fadeTimer);
-    root.classList.add('theme-transition');
+    body.classList.add('theme-transition');
     veil.classList.add('on');
     shown = true;
   }
@@ -581,13 +577,13 @@
     veil.classList.remove('on');
     shown = false;
     clearTimeout(fadeTimer);
-    fadeTimer = setTimeout(() => root.classList.remove('theme-transition'), 450);
+    fadeTimer = setTimeout(() => body.classList.remove('theme-transition'), 450);
   }
   function reset() {
     stop();
     clearTimeout(fadeTimer);
     veil.classList.remove('on');
-    root.classList.remove('theme-transition');
+    body.classList.remove('theme-transition');
     shown = false;
   }
   function stop() {

@@ -62,7 +62,7 @@ a { color: inherit; text-decoration: none; }
 }
 .theme-veil.on { display: block; will-change: clip-path; }
 /* 遮罩在内容下方时，文字/卡片颜色必须跟着渐变，否则会出现深色字压深色底 */
-html.theme-transition {
+body.theme-transition {
   transition: --bg .42s ease, --bg-soft .42s ease, --veil .42s ease,
     --text .42s ease, --text-dim .42s ease, --accent .42s ease,
     --accent-2 .42s ease, --glass .42s ease, --glass-border .42s ease;
@@ -185,7 +185,7 @@ body.holding { user-select: none; }
 }
 .social svg { width: 27px; height: 27px; }
 .social svg.qq-icon { width: 24px; height: 24px; }
-.qq-icon { width: 24px; height: 24px; flex: none; display: block; }
+.qq-icon, .wx-icon { width: 24px; height: 24px; flex: none; display: block; }
 .social-label { font-size: 13px; letter-spacing: .3px; }
 .social:hover, .social:focus-visible {
   transform: translateY(-4px) scale(1.15); margin-inline: 10px;
