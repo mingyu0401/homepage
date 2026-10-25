@@ -9,6 +9,8 @@
   let lightMix = document.documentElement.dataset.theme === 'light' ? 1 : 0;
   let lightTarget = lightMix;
   let last = performance.now();
+  // 长按彩蛋：holdMix 0→1 平滑进出，浅色=雨滴定格后逆流，深色=星点绕头像旋转
+  let holdMix = 0, holding = false, holdTimer = 0, ax = 0, ay = 0;
 
   function makeStar() {
     const r = Math.random() * 1.2 + .35;
@@ -77,12 +79,48 @@
     lightTarget = document.documentElement.dataset.theme === 'light' ? 1 : 0;
   }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
+  const avatarEl = document.querySelector('.avatar');
+  addEventListener('pointerdown', e => {
+    if (reduce || e.button !== 0) return;
+    if (e.target instanceof Element && e.target.closest('a,button,input,textarea,select')) return;
+    const sx = e.clientX, sy = e.clientY;
+    clearTimeout(holdTimer);
+    holdTimer = setTimeout(() => {
+      if (!avatarEl) return;
+      const b = avatarEl.getBoundingClientRect();
+      ax = b.left + b.width / 2;
+      ay = b.top + b.height / 2;
+      holding = true;
+      document.body.classList.add('holding');
+    }, 380);
+    function end() {
+      clearTimeout(holdTimer);
+      holding = false;
+      document.body.classList.remove('holding');
+      removeEventListener('pointermove', onMove);
+      removeEventListener('pointerup', end);
+      removeEventListener('pointercancel', end);
+    }
+    function onMove(ev) {
+      if (Math.abs(ev.clientX - sx) + Math.abs(ev.clientY - sy) > 14) end();
+    }
+    addEventListener('pointermove', onMove);
+    addEventListener('pointerup', end);
+    addEventListener('pointercancel', end);
+  });
+
   function tick(now) {
     const dt = Math.max(0, Math.min(now - last, 48)) / 16.667;
     last = now;
     lightMix += (lightTarget - lightMix) * Math.min(1, dt * .06);
     if (Math.abs(lightTarget - lightMix) < .002) lightMix = lightTarget;
     const mix = lightMix;
+    const holdTo = holding ? 1 : 0;
+    holdMix += (holdTo - holdMix) * Math.min(1, dt * .045);
+    if (Math.abs(holdTo - holdMix) < .002) holdMix = holdTo;
+    // 1 = 下落，0 = 定格成点，-1 = 全速逆流；拖尾长度与方向随它连续变化
+    const rainDir = 1 - 2 * holdMix;
+    const spin = holdMix * (1 - mix); // 旋转彩蛋只在深色（星空）下生效
     ctx.clearRect(0, 0, W, H);
 
     const cr = Math.round(255 - 165 * mix);
@@ -98,11 +136,21 @@
       if (s.a > 1) { s.a = 1; s.va *= -1; }
       else if (s.a < .05) { s.a = .05; s.va *= -1; }
 
-      const fall = (s.vy * (1 - mix) + s.rain * mix) * dt;
+      if (spin > .002) {
+        const dth = .022 * spin * dt;
+        const co = Math.cos(dth), si = Math.sin(dth);
+        const dx = s.x - ax, dy = s.y - ay;
+        s.x = ax + dx * co - dy * si;
+        s.y = ay + dx * si + dy * co;
+      }
+
+      const fall = (s.vy * (1 - mix) + s.rain * mix * rainDir) * dt;
       s.y += fall;
       s.x += fall * TILT * mix;
       if (s.y > H + 24) { s.y = -24; s.x = Math.random() * W; }
+      else if (s.y < -24) { s.y = H + 24; s.x = Math.random() * W; }
       else if (s.x > W + 24) s.x = -24;
+      else if (s.x < -24) s.x = W + 24;
 
       const alpha = s.a * .8 * (1 - mix) + (s.a * .3 + .2) * mix;
       ctx.strokeStyle = `rgba(${cr},${cg},${cb},${alpha.toFixed(3)})`;
@@ -113,9 +161,10 @@
         ctx.fill();
       } else {
         ctx.lineWidth = s.r * 2 * (1 - mix) + 1.4 * mix;
+        const trail = s.len * rainLen * rainDir;
         ctx.beginPath();
         ctx.moveTo(s.x, s.y);
-        ctx.lineTo(s.x - slant * s.len * rainLen, s.y - drop * s.len * rainLen);
+        ctx.lineTo(s.x - slant * trail, s.y - drop * trail);
         ctx.stroke();
       }
     }
@@ -602,4 +651,14 @@
 (() => {
   const el = document.getElementById('footer-year');
   el.textContent = new Date().getFullYear();
+})();
+
+/* ===== LiveXP 最新版本号（拉取失败则保留 HTML 里的兜底值） ===== */
+(() => {
+  const el = document.getElementById('lxv');
+  if (!el) return;
+  fetch('https://api.github.com/repos/mingyu0401/liveXP/releases/latest', { headers: { Accept: 'application/vnd.github+json' } })
+    .then(r => r.ok ? r.json() : Promise.reject())
+    .then(d => { if (d && d.tag_name) el.textContent = d.tag_name; })
+    .catch(() => {});
 })();

@@ -153,6 +153,17 @@ body.theme-transition *::after {
 .motto { margin-top: 26px; color: var(--text-dim); font-size: 15px; }
 .hero-stats { margin-top: 10px; font-size: 13px; color: var(--text-dim); display: flex; gap: 10px; align-items: center; }
 .hero-stats i { font-style: normal; opacity: .5; }
+#uptime .up-link {
+  color: var(--accent); font-weight: 600; position: relative;
+  border-bottom: 1px dashed transparent; transition: border-color .25s;
+}
+#uptime .up-link:hover { border-bottom-color: var(--accent); }
+#uptime .up-link::after {
+  content: '↗'; font-size: .72em; margin-left: 1px; vertical-align: super; opacity: .7;
+}
+#lxv { font-variant-numeric: tabular-nums; }
+/* 长按彩蛋期间禁用文本选中，避免误拖出选区 */
+body.holding { user-select: none; }
 
 .social-row { display: flex; gap: 14px; margin-top: 26px; flex-wrap: wrap; justify-content: center; }
 .social {
