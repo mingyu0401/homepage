@@ -53,13 +53,13 @@
   addEventListener('resize', layout);
   layout();
 
-  function spawnMeteor(x, y, shower) {
+  function spawnMeteor() {
     meteors.push({
-      x: x ?? Math.random() * W * .9,
-      y: y ?? (shower ? -Math.random() * H * .3 : -20),
+      x: Math.random() * W * .9,
+      y: -20,
       len: Math.random() * 170 + 190,
-      v: (Math.random() * 14 + 40) * (shower ? 1.4 : 1),
-      ang: Math.PI / 3.4 + (shower ? (Math.random() - .5) * .5 : 0),
+      v: Math.random() * 14 + 40,
+      ang: Math.PI / 3.4,
       life: 1,
     });
   }
@@ -72,9 +72,6 @@
   if (!reduce) {
     setTimeout(() => { if (!document.hidden && lightTarget === 0) spawnMeteor(); scheduleMeteor(); }, 1500);
   }
-  document.addEventListener('meteor-shower', () => {
-    for (let i = 0; i < 14; i++) spawnMeteor(Math.random() * W, -Math.random() * H * .35, true);
-  });
 
   new MutationObserver(() => {
     lightTarget = document.documentElement.dataset.theme === 'light' ? 1 : 0;
@@ -605,35 +602,4 @@
 (() => {
   const el = document.getElementById('footer-year');
   el.textContent = new Date().getFullYear();
-})();
-
-/* ===== 键盘彩蛋 ===== */
-(() => {
-  const seq = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
-  let at = 0;
-  let timer;
-  addEventListener('keydown', e => {
-    if (e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
-    const key = e.key.length === 1 ? e.key.toLowerCase() : e.key;
-    if (key === seq[at]) {
-      at++;
-      if (at === seq.length) { at = 0; fire(); }
-    } else {
-      at = key === seq[0] ? 1 : 0;
-    }
-  });
-
-  function fire() {
-    document.dispatchEvent(new CustomEvent('meteor-shower'));
-    let el = document.querySelector('.toast.egg');
-    if (!el) {
-      el = document.createElement('div');
-      el.className = 'toast egg';
-      document.body.append(el);
-    }
-    el.textContent = 'Konami · 老玩家认证';
-    el.classList.add('show');
-    clearTimeout(timer);
-    timer = setTimeout(() => el.classList.remove('show'), 2600);
-  }
 })();
