@@ -1,4 +1,16 @@
 /* ============ 主题变量 ============ */
+/* 注册为可动画颜色：切换主题时只动画 :root 上的变量本身，全站颜色靠继承
+   连续变化。逐元素过渡会被遮罩 tween 的每帧重排不断重置起算时间，导致
+   文字颜色拖到动画结束后才跳变 */
+@property --bg { syntax: "<color>"; inherits: true; initial-value: #0b0e17; }
+@property --bg-soft { syntax: "<color>"; inherits: true; initial-value: #121627; }
+@property --veil { syntax: "<color>"; inherits: true; initial-value: #0b0e17; }
+@property --text { syntax: "<color>"; inherits: true; initial-value: #e8eaf2; }
+@property --text-dim { syntax: "<color>"; inherits: true; initial-value: #b8c0d4; }
+@property --accent { syntax: "<color>"; inherits: true; initial-value: #f9a86c; }
+@property --accent-2 { syntax: "<color>"; inherits: true; initial-value: #ff7fa5; }
+@property --glass { syntax: "<color>"; inherits: true; initial-value: rgba(255, 255, 255, .05); }
+@property --glass-border { syntax: "<color>"; inherits: true; initial-value: rgba(255, 255, 255, .1); }
 :root {
   color-scheme: dark;
   --bg: #0b0e17;
@@ -50,12 +62,10 @@ a { color: inherit; text-decoration: none; }
 }
 .theme-veil.on { display: block; will-change: clip-path; }
 /* 遮罩在内容下方时，文字/卡片颜色必须跟着渐变，否则会出现深色字压深色底 */
-body.theme-transition,
-body.theme-transition *,
-body.theme-transition *::before,
-body.theme-transition *::after {
-  transition: background-color .42s ease, color .42s ease, border-color .42s ease,
-    fill .42s ease, stroke .42s ease, box-shadow .42s ease;
+html.theme-transition {
+  transition: --bg .42s ease, --bg-soft .42s ease, --veil .42s ease,
+    --text .42s ease, --text-dim .42s ease, --accent .42s ease,
+    --accent-2 .42s ease, --glass .42s ease, --glass-border .42s ease;
 }
 .meteor-field {
   position: fixed; inset: -20%; z-index: -1; pointer-events: none;

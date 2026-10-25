@@ -11,6 +11,7 @@
   let last = performance.now();
   // 长按彩蛋：holdMix 0→1 平滑进出，浅色=雨滴定格后逆流，深色=星点绕头像旋转
   let holdMix = 0, holding = false, holdTimer = 0, ax = 0, ay = 0;
+  let spinMix = 0, spinVel = 0;
 
   function makeStar() {
     const r = Math.random() * 1.2 + .35;
@@ -120,7 +121,11 @@
     if (Math.abs(holdTo - holdMix) < .002) holdMix = holdTo;
     // 1 = 下落，0 = 定格成点，-1 = 全速逆流；拖尾长度与方向随它连续变化
     const rainDir = 1 - 2 * holdMix;
-    const spin = holdMix * (1 - mix); // 旋转彩蛋只在深色（星空）下生效
+    // 旋转用二阶临界阻尼：起转从零速缓入、松手同样缓出，两端手感一致
+    spinVel += ((holdTo - spinMix) * .006 - spinVel * .16) * dt;
+    spinMix += spinVel * dt;
+    if (Math.abs(holdTo - spinMix) < .002 && Math.abs(spinVel) < .002) { spinMix = holdTo; spinVel = 0; }
+    const spin = Math.max(0, Math.min(1, spinMix)) * (1 - mix); // 旋转彩蛋只在深色（星空）下生效
     ctx.clearRect(0, 0, W, H);
 
     const cr = Math.round(255 - 165 * mix);
@@ -567,7 +572,7 @@
   function show() {
     if (shown) return;
     clearTimeout(fadeTimer);
-    body.classList.add('theme-transition');
+    root.classList.add('theme-transition');
     veil.classList.add('on');
     shown = true;
   }
@@ -576,13 +581,13 @@
     veil.classList.remove('on');
     shown = false;
     clearTimeout(fadeTimer);
-    fadeTimer = setTimeout(() => body.classList.remove('theme-transition'), 450);
+    fadeTimer = setTimeout(() => root.classList.remove('theme-transition'), 450);
   }
   function reset() {
     stop();
     clearTimeout(fadeTimer);
     veil.classList.remove('on');
-    body.classList.remove('theme-transition');
+    root.classList.remove('theme-transition');
     shown = false;
   }
   function stop() {
