@@ -11,6 +11,7 @@
   let last = performance.now();
   // 长按彩蛋：holdMix 0→1 平滑进出，浅色=雨滴定格后逆流，深色=星点绕头像旋转
   let holdMix = 0, holding = false, holdTimer = 0, ax = 0, ay = 0;
+  let spinMix = 0; // 旋转单独缓动：起步更慢，松手沿用 holdMix 的速率
 
   function makeStar() {
     const r = Math.random() * 1.2 + .35;
@@ -120,7 +121,9 @@
     if (Math.abs(holdTo - holdMix) < .002) holdMix = holdTo;
     // 1 = 下落，0 = 定格成点，-1 = 全速逆流；拖尾长度与方向随它连续变化
     const rainDir = 1 - 2 * holdMix;
-    const spin = holdMix * (1 - mix); // 旋转彩蛋只在深色（星空）下生效
+    spinMix += (holdTo - spinMix) * Math.min(1, dt * (holdTo > spinMix ? .022 : .045));
+    if (Math.abs(holdTo - spinMix) < .002) spinMix = holdTo;
+    const spin = spinMix * (1 - mix); // 旋转彩蛋只在深色（星空）下生效
     ctx.clearRect(0, 0, W, H);
 
     const cr = Math.round(255 - 165 * mix);
@@ -138,7 +141,7 @@
 
       if (spin > .002) {
         // canvas 的 y 轴向下，负角度才是视觉上的逆时针
-        const dth = -.022 * spin * dt;
+        const dth = -.0132 * spin * dt;
         const co = Math.cos(dth), si = Math.sin(dth);
         const dx = s.x - ax, dy = s.y - ay;
         s.x = ax + dx * co - dy * si;

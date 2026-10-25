@@ -20,6 +20,10 @@
     <path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M13.5 8.5c0-2.5-2.5-4.5-5.5-4.5S2.5 6 2.5 8.5c0 1.4.8 2.7 2 3.5l-.5 2 2.2-1.2c.6.1 1.2.2 1.8.2"/>
     <path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M21.5 14.5c0-2.2-2.2-4-5-4s-5 1.8-5 4 2.2 4 5 4c.6 0 1.1-.1 1.6-.2l2 1.1-.4-1.8c1.1-.7 1.8-1.8 1.8-3.1z"/>
   </symbol>
+  <!-- 酷安标志：Arcticons (CC BY-SA 4.0) -->
+  <symbol id="i-coolapk" viewBox="0 0 48 48">
+    <path fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" d="M26.208 20.416c-4.112-3.263-7.945-6.067-12.057-6.067a9.65 9.65 0 0 0 0 19.302c5.809 0 15.723-11.615 18.649-18.734L43.5 33.65c-2.888-2.22-7.995-5.996-12.8-9.651"/>
+  </symbol>
 </svg>
 <canvas id="starfield" aria-hidden="true"></canvas>
 <div class="meteor-field" aria-hidden="true"></div>
@@ -76,26 +80,25 @@
     </div>
 
     <div class="social-row reveal">
-      <a class="social" href="https://github.com/mingyu0401" target="_blank" rel="noopener" title="点击跳转网页">
-        <svg viewBox="0 0 24 24"><defs>
+      <a class="social" href="https://github.com/mingyu0401" target="_blank" rel="noopener" data-tip="mingyu0401" aria-label="GitHub：mingyu0401">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><defs>
           <linearGradient id="ghg" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
             <stop class="gs1" offset="0"/><stop class="gs2" offset=".5"/><stop class="gs3" offset="1"/>
           </linearGradient>
         </defs><path fill="url(#ghg)" d="M12 .5A11.5 11.5 0 0 0 .5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.24.79-.54v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.34-1.28-1.7-1.28-1.7-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.79 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.12 3.05.74.81 1.18 1.83 1.18 3.09 0 4.41-2.69 5.38-5.25 5.67.41.35.78 1.05.78 2.12v3.14c0 .3.2.65.8.54A11.5 11.5 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5z"/></svg>
-        <span class="social-label">mingyu0401</span>
       </a>
-      <button type="button" class="social" data-copy="mingyu0401@qq.com" title="点击复制：mingyu0401@qq.com">
-        <svg class="s-mail" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" d="M3 6h18v12H3z"/><path fill="none" stroke="currentColor" stroke-width="1.8" d="M3 7l9 6 9-6"/></svg>
-        <span class="social-label">点击复制</span>
+      <button type="button" class="social" data-copy="mingyu0401@qq.com" data-tip="mingyu0401@qq.com" aria-label="复制邮箱：mingyu0401@qq.com">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" d="M3 6h18v12H3z"/><path fill="none" stroke="currentColor" stroke-width="1.8" d="M3 7l9 6 9-6"/></svg>
       </button>
-      <button type="button" class="social" data-copy="1040132790" title="点击复制：1040132790">
+      <button type="button" class="social" data-copy="1040132790" data-tip="1040132790" aria-label="复制 QQ：1040132790">
         <svg class="qq-icon" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-qq"/></svg>
-        <span class="social-label">1040132790</span>
       </button>
-      <button type="button" class="social" data-copy="mingyu1145141" title="点击复制：mingyu1145141">
-        <svg class="s-chat" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-wechat"/></svg>
-        <span class="social-label">mingyu1145141</span>
+      <button type="button" class="social" data-copy="mingyu1145141" data-tip="mingyu1145141" aria-label="复制微信：mingyu1145141">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-wechat"/></svg>
       </button>
+      <a class="social" href="https://www.coolapk.com/u/3856524" target="_blank" rel="noopener" data-tip="酷安 · 3856524" aria-label="酷安：3856524">
+        <svg viewBox="0 0 48 48" aria-hidden="true"><use href="#i-coolapk"/></svg>
+      </a>
     </div>
 
     <a href="#emoo" class="hero-cta reveal glass" id="hero-cta">
