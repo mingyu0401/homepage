@@ -43,6 +43,7 @@
 html {
   scroll-behavior: smooth;
   scroll-snap-type: y proximity;
+  overflow-x: clip;
 }
 /* 桌面端视口足够高时启用整页吸附：一次滚动停在一整屏，不做一小段一小段 */
 @media (min-width: 761px) {
