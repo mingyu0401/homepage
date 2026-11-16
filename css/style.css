@@ -249,6 +249,8 @@ body.holding { user-select: none; }
 /* 整页吸附锚点：滚一次停一页，禁止一屏内连跳 */
 .hero, .section { scroll-snap-align: start; scroll-snap-stop: always; }
 .site-footer { scroll-snap-align: end; }
+/* 关于我 / 联系我 内容较少，缩短占屏高度，避免两页之间留出大片空档 */
+#about, #contact { min-height: 70vh; }
 
 /* ============ EMOO 卡片 ============ */
 .emoo-card {
